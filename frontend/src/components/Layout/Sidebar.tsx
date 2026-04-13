@@ -7,7 +7,9 @@ import {
   BarChart3,
   ChefHat,
   Bell,
+  X,
 } from 'lucide-react';
+
 const navItems = [
   { path: '/', label: 'דשבורד', icon: LayoutDashboard },
   { path: '/invoices', label: 'חשבוניות', icon: FileText },
@@ -18,16 +20,25 @@ const navItems = [
 
 const activeAlerts = 0;
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
 
   return (
-    <aside className="fixed right-0 top-0 h-screen w-64 bg-navy-900 flex flex-col z-40 overflow-hidden">
+    <aside
+      className={`fixed right-0 top-0 h-screen w-64 bg-navy-900 flex flex-col z-40 overflow-hidden
+        transition-transform duration-300
+        ${isOpen ? 'translate-x-0' : 'translate-x-full'} lg:translate-x-0`}
+    >
       {/* Subtle background texture */}
       <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(ellipse_at_50%_0%,rgba(201,168,76,0.6),transparent_70%)] pointer-events-none" />
 
       {/* Logo */}
-      <div className="px-6 pt-8 pb-6 border-b border-white/5">
+      <div className="px-6 pt-8 pb-6 border-b border-white/5 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-gold-400 rounded-xl flex items-center justify-center shadow-glow-gold">
             <ChefHat size={18} className="text-navy-900" />
@@ -37,6 +48,12 @@ export default function Sidebar() {
             <p className="text-slate-500 text-[10px] mt-0.5 tracking-wider uppercase">Restaurant Finance</p>
           </div>
         </div>
+        <button
+          onClick={onClose}
+          className="lg:hidden w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center"
+        >
+          <X size={14} className="text-white" />
+        </button>
       </div>
 
       {/* Navigation */}
@@ -48,6 +65,7 @@ export default function Sidebar() {
             <NavLink
               key={path}
               to={path}
+              onClick={onClose}
               className={`nav-item ${isActive ? 'nav-item-active' : 'nav-item-inactive'}`}
             >
               <Icon size={17} className={isActive ? 'text-gold-400' : ''} />

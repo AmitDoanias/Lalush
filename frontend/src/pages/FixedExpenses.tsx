@@ -44,7 +44,7 @@ export default function FixedExpenses() {
   const handleToggle = (id: number) => setExpenses(prev => prev.map(e => e.id === id ? { ...e, active: !e.active } : e));
 
   return (
-    <div className="p-8 page-enter">
+    <div className="p-4 md:p-8 page-enter">
       <PageHeader
         title="הוצאות קבועות"
         subtitle="ניהול הוצאות חוזרות חודשיות ושנתיות"

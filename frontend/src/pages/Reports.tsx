@@ -3,7 +3,7 @@ import PageHeader from '../components/common/PageHeader';
 
 export default function Reports() {
   return (
-    <div className="p-8 page-enter">
+    <div className="p-4 md:p-8 page-enter">
       <PageHeader
         title="דוחות פיננסיים"
         subtitle="ניתוח רווח והפסד, Food Cost ומע״מ"

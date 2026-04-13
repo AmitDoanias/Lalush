@@ -3,7 +3,7 @@ import PageHeader from '../components/common/PageHeader';
 
 export default function Suppliers() {
   return (
-    <div className="p-8 page-enter">
+    <div className="p-4 md:p-8 page-enter">
       <PageHeader
         title="ספקים ומוצרים"
         subtitle="0 ספקים פעילים"

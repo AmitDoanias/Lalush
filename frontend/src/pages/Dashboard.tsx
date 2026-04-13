@@ -106,7 +106,7 @@ export default function Dashboard() {
   const unresolvedAlerts: Alert[] = [];
 
   return (
-    <div className="p-8 page-enter">
+    <div className="p-4 md:p-8 page-enter">
       <PageHeader
         title="דשבורד"
         subtitle="מרץ 2026 — סקירה כללית"
@@ -119,14 +119,12 @@ export default function Dashboard() {
           label="מחזור חודשי"
           value={fmt(current_month.revenue)}
           icon={<DollarSign size={18} />}
-          trend={7.4}
           delay="0ms"
         />
         <KpiCard
           label="Food Cost %"
           value={fmtPct(current_month.food_cost_pct)}
           icon={<Percent size={18} />}
-          trend={-1.2}
           accent="bg-blue-50 text-blue-500"
           delay="80ms"
         />
@@ -134,7 +132,6 @@ export default function Dashboard() {
           label="רווח גולמי"
           value={fmt(current_month.gross_profit)}
           icon={<TrendingUp size={18} />}
-          trend={3.8}
           accent="bg-emerald-50 text-success"
           delay="160ms"
         />

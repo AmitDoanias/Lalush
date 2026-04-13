@@ -49,6 +49,7 @@ export default function InvoiceUploadModal({ onClose, onSaved }: Props) {
   const [editableItems, setEditableItems] = useState<(GeminiItem & { received: number })[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleFile = async (file: File) => {
@@ -79,6 +80,20 @@ export default function InvoiceUploadModal({ onClose, onSaved }: Props) {
       const result = json.data as GeminiResult;
       setOcrResult(result);
       setEditableItems((result.items || []).map(i => ({ ...i, received: i.quantity })));
+
+      if (result.invoice_number) {
+        const { data: existing } = await supabase
+          .from('invoices')
+          .select('id, invoice_date, supplier_name')
+          .eq('invoice_number', result.invoice_number)
+          .maybeSingle();
+        if (existing) {
+          setDuplicateWarning(
+            `חשבונית מספר ${result.invoice_number} כבר קיימת במערכת (${existing.supplier_name}, ${existing.invoice_date})`
+          );
+        }
+      }
+
       setStep('confirm');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'שגיאה בסריקה — נסה שוב');
@@ -148,13 +163,14 @@ export default function InvoiceUploadModal({ onClose, onSaved }: Props) {
     setOcrResult(null);
     setEditableItems([]);
     setError(null);
+    setDuplicateWarning(null);
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-navy-950/60 backdrop-blur-sm" />
       <div
-        className="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-up"
+        className="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[95vh] overflow-y-auto animate-fade-up"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -258,13 +274,28 @@ export default function InvoiceUploadModal({ onClose, onSaved }: Props) {
                     {ocrResult.invoice_number || 'ללא מספר'} · {ocrResult.invoice_date || '—'}
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-[10px] text-slate-400">סה״כ כולל מע״מ</p>
-                  <p className="font-display font-semibold text-navy-800">
-                    {fmt(ocrResult.total_with_vat || 0)}
-                  </p>
+                <div className="text-right flex gap-4">
+                  <div>
+                    <p className="text-[10px] text-slate-400">לפני מע״מ</p>
+                    <p className="font-semibold text-navy-700 text-sm">{fmt(ocrResult.subtotal || 0)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-slate-400">מע״מ (18%)</p>
+                    <p className="font-semibold text-slate-500 text-sm">{fmt(ocrResult.vat_amount || 0)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-slate-400">סה״כ כולל מע״מ</p>
+                    <p className="font-display font-semibold text-navy-800">{fmt(ocrResult.total_with_vat || 0)}</p>
+                  </div>
                 </div>
               </div>
+
+              {duplicateWarning && (
+                <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 mb-4 flex gap-2">
+                  <AlertTriangle size={15} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-amber-700">{duplicateWarning}</p>
+                </div>
+              )}
 
               {editableItems.some(i => i.received !== i.quantity) && (
                 <div className="bg-red-50 border border-danger/20 rounded-xl p-3 mb-4 flex gap-2">

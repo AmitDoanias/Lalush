@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, Filter, Camera, FileText, AlertTriangle, CheckCircle, Eye, ScanLine, Loader2 } from 'lucide-react';
+import { Plus, Search, Filter, Camera, FileText, AlertTriangle, CheckCircle, Eye, ScanLine, Loader2, ChevronRight, ChevronLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Invoice } from '../types';
 import PageHeader from '../components/common/PageHeader';
@@ -11,6 +11,18 @@ const fmt = (n: number) =>
 
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: '2-digit' });
+
+// ─── Supplier avatar color ────────────────────────────────────────────────
+
+function supplierColor(name: string): string {
+  const colors = [
+    'bg-blue-500', 'bg-emerald-500', 'bg-violet-500', 'bg-amber-500',
+    'bg-rose-500', 'bg-cyan-500', 'bg-orange-500', 'bg-teal-500',
+  ];
+  let hash = 0;
+  for (const c of name) hash = (hash * 31 + c.charCodeAt(0)) & 0xff;
+  return colors[hash % colors.length];
+}
 
 // ─── Invoice Card ──────────────────────────────────────────────────────────
 
@@ -30,7 +42,9 @@ function InvoiceCard({ invoice, onView }: { invoice: Invoice; onView: () => void
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <FileText size={36} className="text-slate-300" />
+            <div className={`w-14 h-14 rounded-2xl ${supplierColor(invoice.supplier_name)} flex items-center justify-center`}>
+              <span className="text-white text-xl font-bold">{invoice.supplier_name.charAt(0)}</span>
+            </div>
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-navy-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
@@ -89,6 +103,23 @@ export default function Invoices() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [showUpload, setShowUpload] = useState(false);
 
+  // Month navigation — default to current month
+  const now = new Date();
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth()); // 0-based
+
+  const prevMonth = () => {
+    if (selectedMonth === 0) { setSelectedMonth(11); setSelectedYear(y => y - 1); }
+    else setSelectedMonth(m => m - 1);
+  };
+  const nextMonth = () => {
+    if (selectedMonth === 11) { setSelectedMonth(0); setSelectedYear(y => y + 1); }
+    else setSelectedMonth(m => m + 1);
+  };
+
+  const monthLabel = new Date(selectedYear, selectedMonth, 1)
+    .toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
+
   const loadInvoices = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -108,7 +139,11 @@ export default function Invoices() {
 
   const suppliers = [...new Set(invoices.map(i => i.supplier_name))];
 
+  // Filter by selected month first, then apply other filters
+  const monthStr = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}`;
+
   const filtered = invoices.filter(inv => {
+    if (!inv.invoice_date.startsWith(monthStr)) return false;
     if (search && !inv.supplier_name.includes(search) && !inv.invoice_number.includes(search)) return false;
     if (filterSupplier !== 'all' && inv.supplier_name !== filterSupplier) return false;
     if (filterMethod !== 'all' && inv.entry_method !== filterMethod) return false;
@@ -117,7 +152,7 @@ export default function Invoices() {
   });
 
   return (
-    <div className="p-8 page-enter">
+    <div className="p-4 md:p-8 page-enter">
       <PageHeader
         title="חשבוניות"
         subtitle={`${invoices.length} חשבוניות בארכיון`}
@@ -133,9 +168,29 @@ export default function Invoices() {
         }
       />
 
+      {/* Month navigation */}
+      <div className="flex items-center justify-between bg-white rounded-2xl px-5 py-3 shadow-card mb-4">
+        <button
+          onClick={prevMonth}
+          className="w-8 h-8 rounded-lg hover:bg-cream-100 flex items-center justify-center transition-colors"
+        >
+          <ChevronRight size={18} className="text-navy-700" />
+        </button>
+        <div className="text-center">
+          <p className="font-display font-semibold text-navy-800 text-sm">{monthLabel}</p>
+          <p className="text-slate-400 text-xs">{filtered.length} חשבוניות</p>
+        </div>
+        <button
+          onClick={nextMonth}
+          className="w-8 h-8 rounded-lg hover:bg-cream-100 flex items-center justify-center transition-colors"
+        >
+          <ChevronLeft size={18} className="text-navy-700" />
+        </button>
+      </div>
+
       {/* Filters */}
       <div className="bg-white rounded-2xl p-4 shadow-card mb-6 flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px]">
+        <div className="relative w-full sm:flex-1 sm:min-w-[200px]">
           <Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
@@ -192,7 +247,7 @@ export default function Invoices() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filtered.map((inv, i) => (
             <div key={inv.id} className="animate-fade-up" style={{ animationDelay: `${i * 50}ms` }}>
               <InvoiceCard invoice={inv} onView={() => setSelectedInvoice(inv)} />
