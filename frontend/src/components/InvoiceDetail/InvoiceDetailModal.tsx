@@ -1,6 +1,7 @@
-import { X, Download, AlertTriangle, CheckCircle, ZoomIn, Edit3, ScanLine, FileText } from 'lucide-react';
-import type { Invoice } from '../../types';
-import { mockInvoiceItems } from '../../data/mockData';
+import { useState, useEffect } from 'react';
+import { X, Download, AlertTriangle, CheckCircle, ZoomIn, Edit3, ScanLine, FileText, Loader2 } from 'lucide-react';
+import type { Invoice, InvoiceItem } from '../../types';
+import { supabase } from '../../lib/supabase';
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS' }).format(n);
@@ -14,7 +15,19 @@ interface Props {
 }
 
 export default function InvoiceDetailModal({ invoice, onClose }: Props) {
-  const items = mockInvoiceItems[invoice.id] ?? [];
+  const [items, setItems] = useState<InvoiceItem[]>([]);
+  const [loadingItems, setLoadingItems] = useState(true);
+
+  useEffect(() => {
+    supabase
+      .from('invoice_items')
+      .select('*')
+      .eq('invoice_id', invoice.id)
+      .then(({ data }) => {
+        if (data) setItems(data as InvoiceItem[]);
+        setLoadingItems(false);
+      });
+  }, [invoice.id]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -104,8 +117,14 @@ export default function InvoiceDetailModal({ invoice, onClose }: Props) {
             </div>
 
             {/* Items table */}
-            <h3 className="text-sm font-semibold text-navy-800 mb-3">פריטים ({items.length})</h3>
-            {items.length === 0 ? (
+            <h3 className="text-sm font-semibold text-navy-800 mb-3">
+              פריטים {!loadingItems && `(${items.length})`}
+            </h3>
+            {loadingItems ? (
+              <div className="flex items-center gap-2 text-slate-400 text-sm">
+                <Loader2 size={14} className="animate-spin" /> טוען פריטים...
+              </div>
+            ) : items.length === 0 ? (
               <p className="text-slate-400 text-sm">אין פריטים</p>
             ) : (
               <div className="rounded-xl overflow-hidden border border-cream-200">

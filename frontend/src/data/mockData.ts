@@ -50,8 +50,8 @@ export const mockPriceHistory: ProductPriceHistory[] = [
 
 export const mockInvoices: Invoice[] = [
   {
-    id: 1,
-    supplier_id: 2,
+    id: '1',
+    supplier_id: '2',
     supplier_name: 'גורמה בשרים',
     invoice_number: 'INV-2026-0412',
     invoice_date: '2026-04-12',
@@ -64,8 +64,8 @@ export const mockInvoices: Invoice[] = [
     notes: 'מחיר פילה בקר עלה ב-7.9% לעומת הממוצע',
   },
   {
-    id: 2,
-    supplier_id: 3,
+    id: '2',
+    supplier_id: '3',
     supplier_name: 'ים התיכון דגים',
     invoice_number: 'INV-2026-0411',
     invoice_date: '2026-04-11',
@@ -77,8 +77,8 @@ export const mockInvoices: Invoice[] = [
     has_alerts: false,
   },
   {
-    id: 3,
-    supplier_id: 1,
+    id: '3',
+    supplier_id: '1',
     supplier_name: 'טרי מהחווה',
     invoice_number: 'INV-2026-0410',
     invoice_date: '2026-04-10',
@@ -90,8 +90,8 @@ export const mockInvoices: Invoice[] = [
     notes: 'חוסר: מלפפון — הוזמן 20 ק"ג, התקבל 14 ק"ג',
   },
   {
-    id: 4,
-    supplier_id: 4,
+    id: '4',
+    supplier_id: '4',
     supplier_name: 'מחלבת הגליל',
     invoice_number: 'INV-2026-0408',
     invoice_date: '2026-04-08',
@@ -103,8 +103,8 @@ export const mockInvoices: Invoice[] = [
     has_alerts: false,
   },
   {
-    id: 5,
-    supplier_id: 5,
+    id: '5',
+    supplier_id: '5',
     supplier_name: 'שמן זית פרמיום',
     invoice_number: 'INV-2026-0405',
     invoice_date: '2026-04-05',
@@ -115,8 +115,8 @@ export const mockInvoices: Invoice[] = [
     has_alerts: false,
   },
   {
-    id: 6,
-    supplier_id: 2,
+    id: '6',
+    supplier_id: '2',
     supplier_name: 'גורמה בשרים',
     invoice_number: 'INV-2026-0401',
     invoice_date: '2026-04-01',
@@ -131,7 +131,7 @@ export const mockInvoices: Invoice[] = [
 
 // ─── Invoice Items ────────────────────────────────────────────────────────────
 
-export const mockInvoiceItems: Record<number, InvoiceItem[]> = {
+export const mockInvoiceItems: Record<string | number, InvoiceItem[]> = {
   1: [
     { id: 1, invoice_id: 1, product_id: 2, product_name: 'פילה בקר', unit: 'kg', quantity_ordered: 15, quantity_received: 15, unit_price: 96, expected_price: 89, discrepancy: 0, price_change_pct: 7.9, total: 1440 },
     { id: 2, invoice_id: 1, product_id: 7, product_name: 'עוף שלם', unit: 'kg', quantity_ordered: 20, quantity_received: 20, unit_price: 32, expected_price: 32, discrepancy: 0, price_change_pct: 0, total: 640 },

@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Plus, Search, Filter, Camera, FileText, AlertTriangle, CheckCircle, Eye, ScanLine } from 'lucide-react';
-import { mockInvoices } from '../data/mockData';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, Search, Filter, Camera, FileText, AlertTriangle, CheckCircle, Eye, ScanLine, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 import type { Invoice } from '../types';
 import PageHeader from '../components/common/PageHeader';
 import InvoiceDetailModal from '../components/InvoiceDetail/InvoiceDetailModal';
@@ -33,13 +33,11 @@ function InvoiceCard({ invoice, onView }: { invoice: Invoice; onView: () => void
             <FileText size={36} className="text-slate-300" />
           </div>
         )}
-        {/* Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-navy-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
           <span className="text-white text-xs font-medium flex items-center gap-1">
             <Eye size={13} /> צפה בפרטים
           </span>
         </div>
-        {/* Badges */}
         <div className="absolute top-2.5 right-2.5 flex gap-1.5 flex-wrap">
           <span className={invoice.entry_method === 'ocr' ? 'badge-ocr' : 'badge-manual'}>
             {invoice.entry_method === 'ocr' ? <><ScanLine size={10} /> OCR</> : <><FileText size={10} /> ידנית</>}
@@ -82,6 +80,8 @@ function InvoiceCard({ invoice, onView }: { invoice: Invoice; onView: () => void
 // ─── Main ──────────────────────────────────────────────────────────────────
 
 export default function Invoices() {
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterSupplier, setFilterSupplier] = useState('all');
   const [filterMethod, setFilterMethod] = useState('all');
@@ -89,9 +89,26 @@ export default function Invoices() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [showUpload, setShowUpload] = useState(false);
 
-  const suppliers = [...new Set(mockInvoices.map(i => i.supplier_name))];
+  const loadInvoices = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('*')
+      .order('invoice_date', { ascending: false });
 
-  const filtered = mockInvoices.filter(inv => {
+    if (!error && data) {
+      setInvoices(data as Invoice[]);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    loadInvoices();
+  }, [loadInvoices]);
+
+  const suppliers = [...new Set(invoices.map(i => i.supplier_name))];
+
+  const filtered = invoices.filter(inv => {
     if (search && !inv.supplier_name.includes(search) && !inv.invoice_number.includes(search)) return false;
     if (filterSupplier !== 'all' && inv.supplier_name !== filterSupplier) return false;
     if (filterMethod !== 'all' && inv.entry_method !== filterMethod) return false;
@@ -103,7 +120,7 @@ export default function Invoices() {
     <div className="p-8 page-enter">
       <PageHeader
         title="חשבוניות"
-        subtitle={`${mockInvoices.length} חשבוניות בארכיון`}
+        subtitle={`${invoices.length} חשבוניות בארכיון`}
         actions={
           <>
             <button className="btn-secondary" onClick={() => setShowUpload(true)}>
@@ -159,10 +176,20 @@ export default function Invoices() {
       </div>
 
       {/* Grid */}
-      {filtered.length === 0 ? (
+      {loading ? (
+        <div className="bg-white rounded-2xl p-16 shadow-card flex flex-col items-center gap-3">
+          <Loader2 size={28} className="text-gold-400 animate-spin" />
+          <p className="text-slate-500 text-sm">טוען חשבוניות...</p>
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="bg-white rounded-2xl p-16 shadow-card text-center">
           <FileText size={36} className="text-slate-200 mx-auto mb-3" />
-          <p className="text-slate-500">לא נמצאו חשבוניות</p>
+          <p className="text-slate-500 mb-1">
+            {invoices.length === 0 ? 'עדיין אין חשבוניות' : 'לא נמצאו חשבוניות'}
+          </p>
+          {invoices.length === 0 && (
+            <p className="text-slate-400 text-sm">לחץ "סרוק חשבונית" כדי להתחיל</p>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -179,7 +206,10 @@ export default function Invoices() {
         <InvoiceDetailModal invoice={selectedInvoice} onClose={() => setSelectedInvoice(null)} />
       )}
       {showUpload && (
-        <InvoiceUploadModal onClose={() => setShowUpload(false)} />
+        <InvoiceUploadModal
+          onClose={() => setShowUpload(false)}
+          onSaved={loadInvoices}
+        />
       )}
     </div>
   );

@@ -41,10 +41,10 @@ export interface ProductPriceHistory {
 // ─── Invoice ─────────────────────────────────────────────────────────────────
 
 export interface Invoice {
-  id: number;
-  supplier_id: number;
+  id: string;
+  supplier_id?: string;
   supplier_name: string;
-  order_id?: number;
+  order_id?: string;
   invoice_number: string;
   invoice_date: string;
   subtotal: number;

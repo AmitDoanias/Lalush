@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Plus, Edit2, Trash2, X, Save } from 'lucide-react';
-import { mockFixedExpenses } from '../data/mockData';
 import type { FixedExpense } from '../types';
 import PageHeader from '../components/common/PageHeader';
 
@@ -29,7 +28,7 @@ function monthlyAmount(e: FixedExpense) {
 }
 
 export default function FixedExpenses() {
-  const [expenses, setExpenses] = useState(mockFixedExpenses);
+  const [expenses, setExpenses] = useState<FixedExpense[]>([]);
   const [editId, setEditId] = useState<number | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ name: '', category: 'תשתיות', amount: '', frequency: 'monthly' as const });
@@ -65,7 +64,7 @@ export default function FixedExpenses() {
         {Object.entries(byCategory).slice(0, 3).map(([cat, amt]) => (
           <div key={cat} className="kpi-card">
             <p className="text-slate-400 text-xs mb-1">{cat}</p>
-            <p className="font-display text-xl font-semibold text-navy-800">{fmt(amt)}</p>
+            <p className="font-display text-xl font-semibold text-navy-800">{fmt(amt as number)}</p>
           </div>
         ))}
       </div>

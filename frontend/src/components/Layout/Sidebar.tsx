@@ -8,8 +8,6 @@ import {
   ChefHat,
   Bell,
 } from 'lucide-react';
-import { mockAlerts } from '../../data/mockData';
-
 const navItems = [
   { path: '/', label: 'דשבורד', icon: LayoutDashboard },
   { path: '/invoices', label: 'חשבוניות', icon: FileText },
@@ -18,7 +16,7 @@ const navItems = [
   { path: '/reports', label: 'דוחות פיננסיים', icon: BarChart3 },
 ];
 
-const activeAlerts = mockAlerts.filter(a => !a.resolved).length;
+const activeAlerts = 0;
 
 export default function Sidebar() {
   const location = useLocation();

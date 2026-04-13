@@ -3,8 +3,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell,
 } from 'recharts';
-import { mockDashboardSummary, mockAlerts } from '../data/mockData';
-import type { Alert } from '../types';
+import type { Alert, MonthlyData, CategoryExpense } from '../types';
 import PageHeader from '../components/common/PageHeader';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -95,9 +94,16 @@ function AlertItem({ alert }: { alert: Alert }) {
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 
+const EMPTY_MONTH = {
+  revenue: 0, food_cost: 0, food_cost_pct: 0, fixed_expenses: 0,
+  total_expenses: 0, gross_profit: 0, vat_payable: 0, net_profit: 0,
+};
+
 export default function Dashboard() {
-  const { current_month, monthly_trend, expense_breakdown } = mockDashboardSummary;
-  const unresolvedAlerts = mockAlerts.filter(a => !a.resolved);
+  const current_month = EMPTY_MONTH;
+  const monthly_trend: MonthlyData[] = [];
+  const expense_breakdown: CategoryExpense[] = [];
+  const unresolvedAlerts: Alert[] = [];
 
   return (
     <div className="p-8 page-enter">
@@ -153,6 +159,12 @@ export default function Dashboard() {
               <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-success inline-block rounded" /> רווח</span>
             </div>
           </div>
+          {monthly_trend.length === 0 ? (
+            <div className="h-60 flex flex-col items-center justify-center text-slate-300 gap-2">
+              <TrendingUp size={28} className="opacity-30" />
+              <p className="text-sm">נתונים יופיעו לאחר הזנת חשבוניות</p>
+            </div>
+          ) : (
           <ResponsiveContainer width="100%" height={240}>
             <LineChart data={monthly_trend} margin={{ top: 5, right: 5, bottom: 5, left: 10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0ece6" />
@@ -170,11 +182,17 @@ export default function Dashboard() {
               <Line type="monotone" dataKey="profit" name="רווח" stroke="#10B981" strokeWidth={2} dot={false} strokeDasharray="4 2" activeDot={{ r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
+          )}
         </div>
 
         {/* Pie chart */}
         <div className="bg-white rounded-2xl p-6 shadow-card animate-fade-up" style={{ animationDelay: '400ms' }}>
           <h2 className="section-title mb-5">פילוח הוצאות</h2>
+          {expense_breakdown.length === 0 ? (
+            <div className="h-44 flex flex-col items-center justify-center text-slate-300 gap-2">
+              <p className="text-sm">אין נתונים להצגה</p>
+            </div>
+          ) : (
           <ResponsiveContainer width="100%" height={180}>
             <PieChart>
               <Pie
@@ -197,6 +215,7 @@ export default function Dashboard() {
               />
             </PieChart>
           </ResponsiveContainer>
+          )}
           <div className="mt-3 space-y-1.5">
             {expense_breakdown.slice(0, 5).map((cat) => (
               <div key={cat.category} className="flex items-center justify-between text-xs">
