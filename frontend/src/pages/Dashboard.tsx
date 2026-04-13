@@ -145,12 +145,12 @@ export default function Dashboard() {
       </div>
 
       {/* Charts row */}
-      <div className="grid grid-cols-3 gap-5 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
         {/* Line chart */}
-        <div className="col-span-2 bg-white rounded-2xl p-6 shadow-card animate-fade-up" style={{ animationDelay: '320ms' }}>
-          <div className="flex items-center justify-between mb-5">
+        <div className="col-span-1 lg:col-span-2 bg-white rounded-2xl p-6 shadow-card animate-fade-up" style={{ animationDelay: '320ms' }}>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
             <h2 className="section-title">מחזור מול הוצאות</h2>
-            <div className="flex items-center gap-4 text-xs text-slate-500">
+            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
               <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-gold-400 inline-block rounded" /> מחזור</span>
               <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-navy-700 inline-block rounded" /> הוצאות</span>
               <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-success inline-block rounded" /> רווח</span>
@@ -228,9 +228,9 @@ export default function Dashboard() {
       </div>
 
       {/* Bottom row: P&L summary + Alerts */}
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* P&L mini */}
-        <div className="col-span-2 bg-white rounded-2xl p-6 shadow-card animate-fade-up" style={{ animationDelay: '480ms' }}>
+        <div className="col-span-1 lg:col-span-2 bg-white rounded-2xl p-6 shadow-card animate-fade-up" style={{ animationDelay: '480ms' }}>
           <h2 className="section-title mb-5">סיכום פיננסי — מרץ 2026</h2>
           <div className="space-y-0">
             {[
