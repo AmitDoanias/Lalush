@@ -258,7 +258,12 @@ export default function Invoices() {
 
       {/* Modals */}
       {selectedInvoice && (
-        <InvoiceDetailModal invoice={selectedInvoice} onClose={() => setSelectedInvoice(null)} />
+        <InvoiceDetailModal
+          invoice={selectedInvoice}
+          onClose={() => setSelectedInvoice(null)}
+          onSaved={() => { setSelectedInvoice(null); loadInvoices(); }}
+          onDeleted={() => { setSelectedInvoice(null); loadInvoices(); }}
+        />
       )}
       {showUpload && (
         <InvoiceUploadModal
